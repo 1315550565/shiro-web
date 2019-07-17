@@ -1,0 +1,32 @@
+认证:
+1.获取当前的 Subject. 调用 SecurityUtils.getSubject()
+2.测试当前的用户是否已经被认证(登陆).调用 Subject 的 isAuthenticated()
+3.若没有被认证,则把用户名和密码封装为 UsernamePasswordToken 对象
+    1).创建一个表单页面
+    2).把请求提交到 SpringMVC 的 Handler
+    3).获取用户名和密码
+4.执行登陆: 调用 Subject 的 login(AuthenticationToken) 方法
+5.自定义 Realm 的方法, 从数据库中获取对应的记录,返回给 Shiro.
+    1).实际上需要继承org.apache.shiro.realm.AuthenticatingRealm 类
+    2).实现doGetAuthenticationInfo(AuthenticationToken) 方法
+6.由 shiro 完成密码的对比
+    1).通过AuthenticatingRealm 的 credentialsMatcher 属性来进行的密码的比对
+    2).把一个字符串加密为MD5,盐值加密
+        2.1).在 doGetAuthenticationInfo 方法返回值创建SimpleAuthenticationInfo 对象的时候,需要使用
+             SimpleAuthenticationInfo(principal,credentials,credentialsSalt,realmName)构造器
+        2.2).使用 ByteSource.Util.bytes()来计算盐值.
+        2.3).盐值需要唯一:一般使用随机字符串或user id .
+        2.4).使用new SimpleHash(hashAlgorithnName,credentials,salt,hashIterations)来计算盐值加密后的密码的值
+
+
+授权:
+admin用户可访问admin.jsp 和 user.jsp页面, user 用户只能访问 user.jsp页面,密码都为123456
+1.授权需要继承AutohorizingRealm 类,并实现其 doGetAuthenticationInfo 方法
+2.AuthorizingRealm 类继承自 AuthenticatingRealm 但没有实现AuthenticatingRealm 中的
+  doGetAuthenticationInfo 所以认证和授权只需要继承AuthenticatingRealm 就可以了,同时实现它的两个抽象方法
+
+
+权限注解:
+    https://blog.csdn.net/acmman/article/details/78765315
+shiro标签使用方法:
+    https://blog.csdn.net/yaodieteng1510/article/details/79992247
